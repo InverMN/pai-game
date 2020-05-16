@@ -1,0 +1,39 @@
+{
+	"meta": {
+		"title": "A Developer Map",
+		"size": 7,
+		"author": "Inver",
+		"default_floor": "floor"
+	},
+	"materials": {
+		"border": {
+			"texture": "http://localhost:8080/border.png",
+			"breakable": false,
+			"events": {
+				"create": "console.log(aTest(10,5)"
+			},
+			"functions": {
+				"aTest": {
+					"arguments": "a,b",
+					"body": "return a + b"
+				}
+			}
+		},
+		"blue": {
+			"texture": "http://localhost:8080/blue.png",
+			"breakable": true
+		},
+		"floor": {
+			"texture": "http://localhost:8080/blue.png"
+		}
+	},
+	"walls": [
+		["border","border","border","border","border","border","border"],
+		["border","","","","","","border"],
+		["border","","","","","","border"],
+		["border","","","","","","border"],
+		["border","","","","","","border"],
+		["border","","","","","","border"],
+		["border","border","border","border","border","border","border"]
+	]
+}
