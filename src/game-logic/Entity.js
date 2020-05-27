@@ -1,4 +1,3 @@
-// import { reactive } from 'vue'
 import { Sprite	 } from 'pixi.js'
 import Matter from 'matter-js'
 import { shift, tileSize, tilePixelsWidth } from './World.js'
@@ -7,7 +6,7 @@ const options = {
 	inertia: Infinity,
 	frictionAir: 0,
 	friction: 0,
-	mass: 1,
+	mass: 0,
 }	
 
 class Entity {
@@ -33,26 +32,6 @@ class Entity {
 		sprite.height = this.canvasSize.height
 		stage.addChild(sprite)
 		this.sprite = sprite
-
-		sprite.interactive = true
-		sprite.buttonMode = true
-		sprite.on('pointerdown', () => {
-			const target = this.body
-
-			let x = Math.random()
-			if(x > 0.5) {
-				x%=0.5
-				x*=-1
-			}
-
-			let y = Math.random()
-			if(y > 0.5) {
-				y%=0.5
-				y*=-1
-			}
-
-			Matter.Body.applyForce(target, { x: target.position.x, y: target.position.y }, { x: x/2000 , y: y/2000 })
-		})
 	}
 
 	initPhysics(space){
@@ -63,8 +42,6 @@ class Entity {
 		setInterval(() => {
 			this.update()
 		}, 17)
-
-		console.log(this)
 	}
 
 	update() {
@@ -77,7 +54,7 @@ class Entity {
 			y: this.body.position.y*tileSize + 4*shift 
 		}
 		this.sprite.position = this.canvasPosition
-	}
+	}	
 }
 
 export default Entity

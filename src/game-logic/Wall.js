@@ -16,6 +16,8 @@ class Wall {
 		this.breakable = breakable
 		this.initView(stage)
 		this.initPhysics(space)
+		this._stage = stage
+		this._space = space
 	}
 	initView(stage) {
 		let sprite = Sprite.from(this.texture)
@@ -45,6 +47,7 @@ class Wall {
 			x: this.body.position.x*tileSize + shift,
 			y: this.body.position.y*tileSize + shift 
 		}
+
 		this.sprite.position = this.canvasPosition
 	}
 
@@ -54,8 +57,11 @@ class Wall {
 	}
 
 	remove() {
-		Matter.World.remove(this._space, this.body)
-		this._stage.removeChild(this.sprite)
+		if(this.breakable){
+			Matter.World.remove(this._space, this.body)
+			this._stage.removeChild(this.sprite)
+			return true
+		} else return false
 	}
 }
 

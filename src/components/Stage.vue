@@ -10,8 +10,7 @@ export default {
 	setup() {
 		onMounted(() => {
 			let game = new Game()
-			// game.attach()
-			game.server.world.showPhysics()
+			game.attach()
 			game.server.world.start()
 		})
 	}

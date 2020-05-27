@@ -25,13 +25,17 @@
 		},
 		"floor": {
 			"texture": "http://localhost:8080/blue.png"
+		},
+		"crate": {
+			"texture": "http://localhost:8080/border.png",
+			"breakable": true
 		}
 	},
 	"walls": [
 		["border","border","border","border","border","border","border"],
-		["border","","","","","","border"],
-		["border","","","","","","border"],
-		["border","","","","","","border"],
+		["border","","","crate","","","border"],
+		["border","","","crate","","","border"],
+		["border","","","crate","","","border"],
 		["border","","","","","","border"],
 		["border","","","","","","border"],
 		["border","border","border","border","border","border","border"]
