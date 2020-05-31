@@ -1,23 +1,26 @@
 import { reactive } from 'vue'
 import { Sprite, settings, SCALE_MODES } from 'pixi.js'
 settings.SCALE_MODE = SCALE_MODES.NEAREST;
-import { tileSize, shift } from './World'
+import { tileSize, shift, getStage } from './World'
+import { getAssets } from './Assets.js'
 
 class Floor {
-	constructor(x, y, { texture }, stage) {
+	constructor(name, x, y) {
+		let properties = getAssets().floor[name]
+
 		this.position = reactive({ x: x, y: y })
 		this.canvasPosition = reactive({ x: x*tileSize, y: y*tileSize })
-		this.texture = texture
-		this.initView(stage)
+		this.texture = properties.texture
+		this.initView()
 	}
-	initView(stage) {
+	initView() {
 		let sprite = Sprite.from(this.texture)
 		sprite.anchor.set(0)
 		sprite.x = this.canvasPosition.x + shift
 		sprite.y = this.canvasPosition.y + shift
 		sprite.width = tileSize
 		sprite.height = tileSize
-		stage.addChild(sprite)
+		getStage().addChild(sprite)
 	}
 }
 

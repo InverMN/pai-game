@@ -1,43 +1,96 @@
 {
 	"meta": {
 		"title": "A Developer Map",
-		"size": 7,
+		"size": 12,
 		"author": "Inver",
-		"default_floor": "floor"
+		"defaultFloor": "bricks"
 	},
-	"materials": {
-		"border": {
-			"texture": "http://localhost:8080/border.png",
-			"breakable": false,
-			"events": {
-				"create": "console.log(aTest(10,5)"
-			},
-			"functions": {
-				"aTest": {
-					"arguments": "a,b",
-					"body": "return a + b"
-				}
+	"assets": {
+		"floor": {
+			"bricks": {
+				"texture": "http://localhost:8080/floor.png"
 			}
 		},
-		"blue": {
-			"texture": "http://localhost:8080/blue.png",
-			"breakable": true
+		"wall": {
+			"crate": {
+				"texture": "http://localhost:8080/crate.png",
+				"unbreakable": false
+			},
+			"border": {
+				"texture": "http://localhost:8080/border.png",
+				"unbreakable": true
+			}
 		},
-		"floor": {
-			"texture": "http://localhost:8080/blue.png"
-		},
-		"crate": {
-			"texture": "http://localhost:8080/border.png",
-			"breakable": true
+		"entity": {
+			"tnt": {
+				"texture": "http://localhost:8080/tnt.png",
+				"collide": false,
+				"attract": true,
+				"events": {
+					"init": "setTimeout(() => { world.explosion(self.position.x, self.position.y, 20); self.remove() }, 2000)"
+				}
+			},
+			"explosion": {
+				"texture": "http://localhost:8080/explosion.png",
+				"sensor": true,
+				"collide": true,
+				"attract": true,
+				"events": {
+					"init": "setTimeout(() => { self.remove() }, 1000)"
+				}
+			},
+			"playerBlue": {
+				"texture": "http://localhost:8080/player_blue.png",
+				"collide": true,
+				"attract": false,
+				"controller": {
+					"up": "w",
+					"down": "s",
+					"left": "a",
+					"right": "d",
+					"actions": {
+						" ": "if(vars.lastTNT + vars.reload <= new Date().getTime()){ world.summon('tnt', self.position.x + 0.5, self.position.y + 0.5); vars.lastTNT = new Date().getTime() }"
+					},
+					"vars": {
+						"speed": 0.05,
+						"reload": 3000,
+						"lastTNT": 0
+					}
+				}
+			},
+			"playerRed": {
+				"texture": "http://localhost:8080/player_red.png",
+				"collide": true,
+				"attract": false,
+				"controller": {
+					"up": "i",
+					"down": "k",
+					"left": "j",
+					"right": "l",
+					"actions": {
+						"]": "if(vars.lastTNT + vars.reload <= new Date().getTime()){ world.summon('tnt', self.position.x + 0.5, self.position.y + 0.5); vars.lastTNT = new Date().getTime() }"
+					},
+					"vars": {
+						"speed": 0.05,
+						"reload": 3000,
+						"lastTNT": 0
+					}
+				}
+			}
 		}
 	},
 	"walls": [
-		["border","border","border","border","border","border","border"],
-		["border","","","crate","","","border"],
-		["border","","","crate","","","border"],
-		["border","","","crate","","","border"],
-		["border","","","","","","border"],
-		["border","","","","","","border"],
-		["border","border","border","border","border","border","border"]
+		["border","border","border","border","border","border","border","border","border","border","border","border"],
+		["border","","","crate","","","","crate","crate","crate","crate","border"],
+		["border","","crate","crate","","crate","","crate","","","","border"],
+		["border","","crate","","crate","","","crate","crate","crate","","border"],
+		["border","","crate","","crate","","crate","","","","","border"],
+		["border","crate","","crate","","crate","","crate","","crate","","border"],
+		["border","","crate","","","crate","crate","crate","crate","","","border"],
+		["border","","","","crate","","","crate","","crate","crate","border"],
+		["border","crate","crate","","crate","","","","crate","crate","","border"],
+		["border","","crate","","crate","crate","","crate","","crate","","border"],
+		["border","crate","crate","","","crate","crate","","crate","","","border"],
+		["border","border","border","border","border","border","border","border","border","border","border","border"]
 	]
 }

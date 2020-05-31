@@ -1,6 +1,9 @@
-import { Sprite } from 'pixi.js'
+import * as PIXI from 'pixi.js'
 import Matter from 'matter-js'
-import { tileSize, shift, ratio } from './World.js'
+import { tileSize, shift, ratio, getStage, getSpace } from './World.js'
+import { getAssets } from './Assets.js'
+
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 const options = {
 	inertia: Infinity,
@@ -9,28 +12,29 @@ const options = {
 }
 
 class Wall {
-	constructor(x, y, { texture, breakable }, space, stage) {
+	constructor(name, x, y) {
+		let properties = getAssets().wall[name]
+
+		this.name = name
 		this.position = { x: x, y: y }
 		this.canvasPosition = { x: x*tileSize, y: y*tileSize }
-		this.texture = texture
-		this.breakable = breakable
-		this.initView(stage)
-		this.initPhysics(space)
-		this._stage = stage
-		this._space = space
+		this.texture = properties.texture
+		this.unbreakable = properties.unbreakable
+		this.initView()
+		this.initPhysics()
 	}
-	initView(stage) {
-		let sprite = Sprite.from(this.texture)
+	initView() {
+		let sprite = new PIXI.Sprite(this.texture)
 		sprite.anchor.set(shift/(tileSize * ratio))
 		sprite.width = tileSize * ratio
 		sprite.height = tileSize * ratio
-		stage.addChild(sprite)
+		getStage().addChild(sprite)
 		this.sprite = sprite
 	}
 	
-	initPhysics(space) {
+	initPhysics() {
 		let body = Matter.Bodies.rectangle(this.position.x, this.position.y, 1, 1, options)
-		Matter.World.add(space, body)
+		Matter.World.add(getSpace(), body)
 		this.body = body
 
 		setInterval(() => {
@@ -57,9 +61,9 @@ class Wall {
 	}
 
 	remove() {
-		if(this.breakable){
-			Matter.World.remove(this._space, this.body)
-			this._stage.removeChild(this.sprite)
+		if(!this.unbreakable){
+			Matter.World.remove(getSpace(), this.body)
+			getStage().removeChild(this.sprite)
 			return true
 		} else return false
 	}

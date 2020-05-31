@@ -1,9 +1,9 @@
 import Matter from 'matter-js'
+
+import Assets from './Assets.js'
 import Wall from './Wall.js'
 import Floor from './Floor.js'
 import Entity from './Entity.js'
-import Player from './Player.js'
-import TNT from './TNT.js'
 
 export const tileSize = 50
 export const textureWidth = 20
@@ -12,7 +12,9 @@ export const ratio = textureWidth/faceWidth
 export const shift = tileSize*(ratio - 1)
 export const tilePixelsWidth = 16
 
-export let placeTNT = null
+export let getWorld
+export let getStage
+export let getSpace
 
 class World {
 	engine = Matter.Engine.create()
@@ -20,76 +22,69 @@ class World {
 	runner = Matter.Runner.create()
 
 	constructor(stage) {
+		getWorld = () => this
+		getStage = () => this.stage
+		getSpace = () => this.space
+		
 		this.space.gravity.scale = 0
 		this.stage = stage
-
-		placeTNT = (x, y) => {
-			new TNT(x, y, this.space, this.stage, this)
-		}
 	}
 
 	loadMap(map) {		
-		this.map = map
+		new Assets(map.assets)
+
 		this.meta = map.meta
-		this.materials = map.materials
 
-		this.floor = this.placeFloor()
+		setTimeout(() => {
+			this.floor = this.placeFloor(map.floor)
+			
+			this.players = [this.summon('playerBlue', 1, 1).body, this.summon('playerRed', 10, 10).body]
 
-		const firstPlayerControls = {
-			up: 'w',
-			down: 's',
-			right: 'd',
-			left: 'a',
-			place: ' '
-		}
-
-		this.entities = [new Player({ x: 1, y: 1, texture: 'point.png'}, firstPlayerControls, this.space, this.stage)]
-		this.spawnEntity(1, 1)
-		this.walls = this.buildWalls()
+			this.walls = this.buildWalls(map.walls)
+		}, 1000)
 	}
 
-	buildWalls() {
+	buildWalls(walls) {
+		var wallsAll = []
 
-		var walls = [];
-
-		this.map.walls.forEach((column, y) => {
+		walls.forEach((column, y) => {
 			let wallsRow = []
 
-			for(let x = 0; x < this.map.meta.size; x++)
+			for(let x = 0; x < this.meta.size; x++)
 				wallsRow.push(null)
 
 			column.forEach((wall, x) => {
-				if(wall) wallsRow[x] = (new Wall(x, y, this.materials[wall], this.space, this.stage))
+				if(wall) wallsRow[x] = new Wall(wall, x, y)
 			})
-			walls.push(wallsRow)
+			wallsAll.push(wallsRow)
 		})
 
-		return walls
+		return wallsAll
 	}
 
-	placeFloor() {
-		let floor = []
+	placeFloor(floor) {
+		let floorAll = []
 
-		if(this.map.floor) {
-			this.map.floor.forEach((column, y) => {
+		if(floor) {
+			floor.forEach((column, y) => {
 				let floorRow = []
-				column.forEach((tile, x) => {
-					if(tile) floorRow.push(new Floor(x, y, this.materials[tile], this.stage))
-					else if(this.map.default_floor) floorRow.push(new Floor(x, y, this.materials[this.map.default_floor], this.stage))
+				column.forEach((name, x) => {
+					if(name) floorRow.push(new Floor(name, x, y))
+					else if(this.meta.defaultFloor) floorRow.push(floorRow.push(new Floor(this.meta.defaultFloor, x, y)))
 				})
 				floor.push(floorRow)
 			})
 		} else {
-			for(let x = 0; x < this.map.meta.size; x++) {
+			for(let x = 0; x < this.meta.size; x++) {
 				let floorRow = []
-				for(let y = 0; y < this.map.meta.size; y++) {
-					floorRow.push(new Floor(x, y, this.materials[this.meta.default_floor], this.stage))
+				for(let y = 0; y < this.meta.size; y++) {
+					floorRow.push(new Floor(this.meta.defaultFloor, x, y))
 				}
-				floor.push(floorRow)
+				floorAll.push(floorRow)
 			}
 		}
 
-		return floor
+		return floorAll
 	}
 
 	explosion(x, y, power) {
@@ -117,8 +112,6 @@ class World {
 					
 				break
 			} else if(inY == power) 
-				console.log('test')
-
 				explosionEndpoints.down = { x: x, y: inY}
 		}
 
@@ -146,32 +139,32 @@ class World {
 				explosionEndpoints.up = { x: x, y: inY}
 		}
 
-		for(let inX = x+1; inX <= explosionEndpoints.left.x; inX++) {
+		for(let inX = x; inX <= explosionEndpoints.left.x; inX++) {
 			if(inX == explosionEndpoints.left.x) 	
-				this.spawnEntity(inX, y)
+				this.summon('explosion', inX, y)
 			else 
-				this.spawnEntity(inX, y)
+				this.summon('explosion', inX, y)
 		} 
 
 		for(let inY = y+1; inY <= explosionEndpoints.down.y; inY++) {
 			if(inY == explosionEndpoints.left.y) 	
-				this.spawnEntity(x, inY)
+				this.summon('explosion', x, inY)
 			else 
-				this.spawnEntity(x, inY)
+				this.summon('explosion', x, inY)
 		} 
 
 		for(let inX = x-1; inX >= explosionEndpoints.right.x; inX--) {
 			if(inX == explosionEndpoints.right.x) 	
-				this.spawnEntity(inX, y)
+				this.summon('explosion', inX, y)
 			else 
-				this.spawnEntity(inX, y)
+				this.summon('explosion', inX, y)
 		} 
 
 		for(let inY = y-1; inY >= explosionEndpoints.up.y; inY--) {
 			if(inY == explosionEndpoints.up.y) 	
-				this.spawnEntity(x, inY)
+				this.summon('explosion', x, inY)
 			else 
-				this.spawnEntity(x, inY)
+				this.summon('explosion', x, inY)
 		} 
 	}
 
@@ -182,19 +175,23 @@ class World {
 	removeBlock(x, y) {
 		let block = this.getBlock(x, y)
 		if(block) {
-			return block.remove()
+			let result = block.remove()
+			if(result) {
+				this.walls.forEach((row, y) => {
+					let x = row.indexOf(block)
+					this.walls[y][x] = null
+				})
+			}
+			return result
 		} else return true
 	}
 
-	spawnEntity(x, y) {
-		this.entities.push(new Entity({ x: x, y: y, texture: 'http://localhost:8080/ball.png' }, this.space, this.stage))
+	summon(name, x, y) {
+		return new Entity(name, x, y)
 	}
 
 	start() {
 		Matter.Runner.run(this.runner, this.engine)
-		setTimeout(() => {
-			// this.explosion(2, 2, 10)
-		}, 2000)
 	}
 	
 	stop() {
